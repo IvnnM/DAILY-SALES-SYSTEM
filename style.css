@@ -1,0 +1,35 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #ffdcda;
+  display: inline-flex;
+}
+
+.container {
+  margin: 30px;
+  margin-right: 50px;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 600px;
+}
+
+button {
+  padding: 10px;
+  margin-bottom: 10px;
+  margin-top: 20px;
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+
+}
+input, label, select{
+
+  font-size: 25px;
+  display:block;
+  margin: 6px;
+}

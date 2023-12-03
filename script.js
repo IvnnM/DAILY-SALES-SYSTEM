@@ -1,3 +1,64 @@
+// Function to handle adding stock
+function addStock(productId, productName) {
+    Swal.fire({
+        title: `Enter quantity to add Stocks for ${productName}:`,
+        input: 'number',
+        inputAttributes: {
+            min: 1,
+        },
+        showCancelButton: true,
+        confirmButtonText: 'Add',
+        showLoaderOnConfirm: true,
+        preConfirm: (quantity) => {
+            // Execute the addStock action with the entered quantity
+            const data = {
+                action: 'addStock',
+                product_id: productId,
+                quantity: quantity,
+            };
+            executeAddStock(data);
+        },
+        allowOutsideClick: () => !Swal.isLoading(),
+    });
+}
+
+// Function to execute the addStock action
+function executeAddStock(data) {
+    const url = 'php/product_handler.php';
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    })
+    .then(response => response.text())
+    .then(result => {
+        console.log(result); // Log the result from the server
+        if (result === 'success') {
+            // Show SweetAlert success message
+            Swal.fire({
+                icon: 'success',
+                title: 'Stock added successfully!',
+                showConfirmButton: false,
+                timer: 1500,
+            }).then(() => {
+                // Reload the page after the SweetAlert is closed
+                location.reload();
+            });
+
+        } else {
+            // Handle other cases if needed
+            console.log('Add stock failed');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        // Handle errors if any
+    });
+}
+
 // Function to handle the product action (add/update/delete)
 function handleProductAction(action) {
     const productId = document.getElementById('productProductId').value;
@@ -6,7 +67,7 @@ function handleProductAction(action) {
     const stockQuantity = document.getElementById('productStockQuantity').value;
 
     // Check if any of the required fields is empty or below 0
-    if (!productId || !productName || !unitPrice || !stockQuantity || unitPrice < 0 || stockQuantity < 0) {
+    if ((action !== 'addProduct' && !productId) || !productName || !unitPrice || !stockQuantity || unitPrice < 0 || stockQuantity < 0) {
         Swal.fire({
             icon: 'error',
             title: 'Error',
@@ -37,9 +98,10 @@ function handleProductAction(action) {
         }
     });
 }
+
 // Function to execute the product action (add/update/delete)
 function executeProductAction(action, data) {
-    const url = 'product_handler.php';
+    const url = 'php/product_handler.php';
 
     fetch(url, {
         method: 'POST',
@@ -58,6 +120,9 @@ function executeProductAction(action, data) {
                 title: `${action.toUpperCase()} successfully!`,
                 showConfirmButton: false,
                 timer: 1500
+            }).then(() => {
+                // Reload the page after the SweetAlert is closed
+                location.reload();
             });
 
             // Clear input boxes
@@ -83,21 +148,7 @@ function executeProductAction(action, data) {
     });
 }
 
-// Event listeners for buttons
-document.getElementById("addProductBtn").addEventListener("click", function() {
-    handleProductAction('addProduct');
-});
-
-document.getElementById("updateProductBtn").addEventListener("click", function() {
-    handleProductAction('updateProduct');
-});
-
-document.getElementById("deleteProductBtn").addEventListener("click", function() {
-    handleProductAction('deleteProduct');
-});
-
-//
-
+/////////////////////////////////////////////////////
 // Function to handle the cart action (add/delete)
 function handleCartAction(action) {
     const cartProductId = document.getElementById('cartProductId').value;
@@ -118,7 +169,6 @@ function handleCartAction(action) {
     const data = {
         action: action,
         product_id: cartProductId,
-        product_name: cartProductName,
         unit_price: cartUnitPrice,
         quantity: cartSoldQuantity
     };
@@ -140,7 +190,7 @@ function handleCartAction(action) {
 
 // Function to execute the cart action (add/delete)
 function executeCartAction(action, data) {
-    const url = 'cart_handler.php';
+    const url = 'php/cart_handler.php';
 
     fetch(url, {
         method: 'POST',
@@ -159,6 +209,9 @@ function executeCartAction(action, data) {
                 title: `${action.toUpperCase()} successfully!`,
                 showConfirmButton: false,
                 timer: 1500
+            }).then(() => {
+                // Reload the page after the SweetAlert is closed
+                location.reload();
             });
 
             // Clear input boxes
@@ -180,25 +233,7 @@ function executeCartAction(action, data) {
         // Handle errors if any
     });
 }
-
-// Event listener for add sold items button
-document.getElementById("addSoldProductBtn").addEventListener("click", function(event) {
-    // Prevent the default form submission behavior
-    event.preventDefault();
-
-    handleCartAction('addSoldItems');
-});
-
-// Event listener for delete sold items button
-document.getElementById("deleteSoldProductBtn").addEventListener("click", function(event) {
-    // Prevent the default form submission behavior
-    event.preventDefault();
-
-    handleCartAction('deleteSoldItems');
-});
-
-//
-
+/////////////////////////////////////////
 // Function to handle the submit cart action
 function handleSubmitCart() {
     // Get the selected date from the input field
@@ -226,7 +261,7 @@ function handleSubmitCart() {
     }).then((result) => {
         if (result.isConfirmed) {
             // Make a request to your PHP script to handle the cart submission
-            fetch('submit_cart.php?selectedDate=' + selectedDate)
+            fetch('./php/submit_cart.php?selectedDate=' + selectedDate)
                 .then(response => response.text())
                 .then(result => {
                     // Log the result from the server
@@ -282,4 +317,3 @@ document.getElementById("submitCartBtn").addEventListener("click", function (eve
     // Call the function to handle the submit cart action
     handleSubmitCart();
 });
-

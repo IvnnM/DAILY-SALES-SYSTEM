@@ -1,19 +1,18 @@
 body {
-  border: solid black;
-  padding: 10px;
-  font-family: Arial, sans-serif;
-  background-color: #d2d9d2;
+  padding: 13px;
+
+  background-color: #75acd2;
   /*background-color: #ffdcda;
   color: #2f2a24;*/
-  color: #485047;
+  color: #0a2e48;
 
 }
 ::-webkit-scrollbar {
   width: 12px; 
 }
 ::-webkit-scrollbar-thumb {
-  background: #89a591;
-  border-radius: 50px;
+  background: #1669a2;
+  border-radius: 86px;
 }
 
 .container {
@@ -30,19 +29,21 @@ body {
   max-width: 60%;
   margin-right: 10px;
   background-color: #fff;
+;
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
 }
 #right-container{
   max-width: 40%;
   background-color: #fff;
+;
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
 }
  .btn {
-  padding: 7px;
-  background-color: #0d6efd;
-  color: #fff;
+  padding: 10px;
+  background-color: #54b26b;
+  color: #0a2e48;
   font-weight: bold;
   border: none;
   border-radius: 4px;
@@ -50,38 +51,58 @@ body {
 }
 button, #selectedDate {
   padding: 7px;
-  background-color: #e38421;
-  color: #fff;
+  background-color: #54b26b;
+  color: #0a2e48;
   font-weight: bold;
   border: none;
   border-radius: 4px;
   cursor: pointer;
 }
+#selectedDate {
+  background-color: #75acd2;
+  color: #0a2e48;
+}
 #addStockBtn {
   padding: 7px;
-  background-color: #e38421;
-  color: #fff;
+  background-color: #54b26b;
+  color: #0a2e48;
   font-weight: bold;
   border: none;
   border-radius: 4px;
   cursor: pointer;
 }
 #reports {
-  background-color: #e38421;
+  background-color: #0a2e48;
   color: #fff;
   font-weight: bold;
 }
-
-button:hover, .btn:hover, #addStockBtn:hover{
-  background-color: #4caf50;
+.btn.update {
+  background-color: #ffc107;
+  color: #0a2e48;
+}
+.btn.delete {
+  background-color: #dc3545;
+  color: #0a2e48;
+}
+.btn:hover, .btn.update:hover, .btn.delete:hover, #addStockBtn:hover{
+  transition: background-color 0.3s, color 0.3s;
+  background-color: #1669a2;
   color: #fff;
 }
-
-#reports:hover {
-  background-color: #ecaa65;
-  color: #fff;
-}
-.btn.delete:hover {
+#submitCartBtn:hover {
+  transition: background-color 0.3s, color 0.3s;
   background-color: #dc3545;
   color: #fff;
+}
+#reports:hover {
+  transition: background-color 0.3s, color 0.3s;
+  background-color: #1669a2;
+  color: #fff;
+}
+.form-control{
+  color: black;
+}
+label{
+
+  color: black;
 }

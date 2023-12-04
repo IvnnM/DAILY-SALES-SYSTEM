@@ -48,33 +48,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 case "deleteSoldItems":
                     $productId = $data->product_id;
                 
-                    // Fetch total quantity from cart_table
-                    $fetchTotalQuantityQuery = "SELECT SUM(quantity) AS total_quantity FROM cart_table WHERE product_id = $productId";
-                    $fetchTotalQuantityResult = $con->query($fetchTotalQuantityQuery);
+                    // Fetch the most recent item from cart_table
+                    $fetchLatestCartItemQuery = "SELECT id, quantity FROM cart_table WHERE product_id = $productId ORDER BY timestamp DESC LIMIT 1";
+                    $fetchLatestCartItemResult = $con->query($fetchLatestCartItemQuery);
                 
-                    if ($fetchTotalQuantityResult->num_rows > 0) {
-                        $row = $fetchTotalQuantityResult->fetch_assoc();
-                        $totalQuantity = $row['total_quantity'];
+                    if ($fetchLatestCartItemResult->num_rows > 0) {
+                        $row = $fetchLatestCartItemResult->fetch_assoc();
+                        $latestCartItemId = $row['id'];
+                        $quantityToDelete = $row['quantity'];
                 
-                        if ($totalQuantity > 0) {
-                            // Update products_table
-                            $updateProductsQuery = "UPDATE products_table SET stock_quantity = stock_quantity + $totalQuantity WHERE product_id = $productId";
-                            $con->query($updateProductsQuery);
+                        // Update products_table
+                        $updateProductsQuery = "UPDATE products_table SET stock_quantity = stock_quantity + $quantityToDelete WHERE product_id = $productId";
+                        $con->query($updateProductsQuery);
                 
-                            // Delete all rows for the product from cart_table
-                            $deleteCartQuery = "DELETE FROM cart_table WHERE product_id = $productId";
-                            $con->query($deleteCartQuery);
+                        // Delete the most recent row for the product from cart_table
+                        $deleteCartQuery = "DELETE FROM cart_table WHERE id = $latestCartItemId";
+                        $con->query($deleteCartQuery);
                 
-                            echo "success";
-                        } else {
-                            // No quantity found in the cart_table for the product
-                            echo "No quantity found in cart";
-                        }
+                        echo "success";
                     } else {
-                        // Item not found in cart_table
-                        echo "Item not found in cart";
+                        // No item found in cart_table for the product
+                        echo "No item found in cart";
                     }
-                    break;
+                    break;                
                 
         }
     } else {

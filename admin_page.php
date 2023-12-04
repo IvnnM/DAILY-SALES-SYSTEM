@@ -14,10 +14,6 @@
 
     <!--<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">-->
     <link rel="stylesheet" href="style.css">
-    <style>
-
-
-  </style>
 </head>
 <body>
 
@@ -25,10 +21,10 @@
   <div class="row align-items-start">
     
     <div class="col" id="left-container">
-      <div class="d-block p-2" style="height: 8vh;">
-        <h2>Sari-Sari Store Inventory</h2>
+      <div class="d-block p-2 px-3" style="height: 8vh;">
+        <h2>SARI-SARI STORE INVENTORY</h2>
       </div>
-      <div class="d-block p-3 overflow-y-auto" id="product-container" style="height: 30vh;" >
+      <div class="d-block p-3 pb-0 overflow-y-auto" id="product-container" style="height: 29vh;" >
 
         <form id="productForm">
           <div class="mb-3">
@@ -75,7 +71,7 @@
 
 
           <button type="button" onclick="handleProductAction('addProduct')" class="btn">Add Product</button>
-          <button type="button" onclick="handleProductAction('updateProduct')" class="btn">Update Product</button>
+          <button type="button" onclick="handleProductAction('updateProduct')" class="btn update">Update Product</button>
           <button type="button" onclick="handleProductAction('deleteProduct')" class="btn delete">Delete Product</button>
         </form>
 
@@ -83,7 +79,7 @@
         
       </div>
       <div class="d-block p-2">
-          <div class="overflow-y-auto p-2" id="productList" style="background-color:#212529; border-radius:8px; height: 55vh;">
+          <div class="overflow-y-auto p-2" id="productList" style="background-color: #cfe2ff; border-radius:8px; height: 56vh;">
             <!-- Product list will be displayed here -->
             <?php
             include 'connection.php';
@@ -92,15 +88,15 @@
             $result = $con->query($sql);
             
             if ($result->num_rows > 0) {
-                echo "<table class='table table-dark table-hover' id='productTable'>";
+                echo "<table class='table table-primary' id='productTable'>";
                 echo '
                     <thead>
                         <tr>
                             <th scope="col">Product ID</th>
                             <th scope="col">Product Name</th>
                             <th scope="col">Unit Price</th>
-                            <th scope="col">Stock Quantity</th>
-                            <th scope="col">ACTION</th>
+                            <th scope="col">Stock</th>
+                            <th scope="col"></th>
                         </tr>
                     </thead>';
                 while ($row = $result->fetch_assoc()) {
@@ -127,10 +123,10 @@
       </div>
     </div>
     <div class="col" id="right-container">
-      <div class="d-block p-2" style="height: 8vh;">
-        <h2>Sold Items</h2>
+      <div class="d-block p-2 px-3" style="height: 8vh;">
+        <h2>SOLD ITEMS</h2>
       </div>
-      <div class="d-block p-3 overflow-y-auto" id="cart-container" style="height: 42vh;">
+      <div class="d-block p-3 pb-0 overflow-y-auto" id="cart-container" style="height: 42vh;">
       <form id="cartForm">
         <div class="mb-3">
             <select id="cartProductId" name="cartProductId" class="form-select" aria-label="Product ID">
@@ -174,15 +170,18 @@
 
         <button type="button" onclick="handleCartAction('addSoldItems')" class="btn mb-1">Add Sold Items</button>
         <button type="button" onclick="handleCartAction('deleteSoldItems')" class="btn delete mb-1">Delete Sold Items</button>
-        <button type="button" class="btn mb-1" id="reports">Go To Reports  </button>
+        <a href="dashboard.php" class="btn mb-1" role="button" id="reports">Go To Reports</a>
+
       </form>
 
       </div>
       <div class="d-block p-2">
-        <div class="overflow-y-auto p-2" id="soldProductList" style="background-color:#212529; border-radius:8px; height: 43vh">
-          <input type="date" id="selectedDate" name="selectedDate">
-          <button onclick="loadCart()">Reload Table</button>
-          <button id="submitCartBtn">Submit Report</button>
+        <div class="overflow-y-auto p-2" id="soldProductList" style="background-color:#cfe2ff; border:solid #75acd2; border-radius:8px; height: 43vh">
+            <form method="get">
+                <input type="date" id="selectedDate" name="selectedDate" value="<?php echo isset($_GET['selectedDate']) ? htmlspecialchars($_GET['selectedDate']) : date('Y-m-d'); ?>" onchange="this.form.submit()">
+                <button id="submitCartBtn">Create Report</button>
+            </form>
+          
           <!-- Cart list will be displayed here -->
           <?php
           include 'connection.php';
@@ -195,6 +194,8 @@
               // Use the provided date if available and convert it to the correct format
               $selectedDate = $_GET['selectedDate'];
               $todayDate = date("Y-m-d", strtotime($selectedDate));
+
+
           }
 
           // Your existing SQL query
@@ -204,7 +205,7 @@
           $cartResult = $con->query($cartSql);
 
           if ($cartResult->num_rows > 0) {
-              echo "<table class='table table-dark table-hover overflow-y-auto' id='cartTable'>";
+              echo "<table class='table table table-primary overflow-y-auto' id='cartTable'>";
               echo '
                   <thead>
                       <tr>

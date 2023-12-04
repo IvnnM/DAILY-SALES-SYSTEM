@@ -251,7 +251,7 @@ function handleSubmitCart() {
 
     // Confirm with the user before submitting the cart
     Swal.fire({
-        title: 'Submit Cart?',
+        title: 'Submit Report?',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Submit',
@@ -272,9 +272,12 @@ function handleSubmitCart() {
                         // Show success message
                         Swal.fire({
                             icon: 'success',
-                            title: 'Cart submitted successfully!',
+                            title: 'Report submitted successfully!',
                             showConfirmButton: false,
                             timer: 1500
+                        }).then(() => {
+                            // Reload the page after the SweetAlert is closed
+                            location.reload();
                         });
                         // Optionally, you can clear the cart or take other actions
                     } else if (result === 'Cart is empty.') {

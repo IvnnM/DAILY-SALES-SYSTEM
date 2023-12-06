@@ -1,3 +1,46 @@
+<?php
+// Start session
+session_start();
+
+include 'connection.php';
+
+if (isset($_SESSION["user_id"])) {
+    $sql = "SELECT username FROM user_table
+            WHERE user_id = {$_SESSION["user_id"]}";
+
+    $result = $con->query($sql);
+
+    if ($result) {
+        $user = $result->fetch_assoc();
+    } else {
+        // Add this to see if there's an error in your query
+        echo "Query failed: " . $con->error;
+    }
+}
+
+
+function getRecordCount($con, $table, $condition = "") {
+    $query = "SELECT COUNT(*) AS total_records FROM $table $condition";
+    $result = mysqli_query($con, $query);
+    if (!$result) {
+        die("Query failed: " . mysqli_error($con));
+    }
+    $row = mysqli_fetch_assoc($result);
+    return $row['total_records'];
+}
+
+// Count of products where stock_quantity is less than or equal to 0
+$total_outofstock_products = getRecordCount($con, "products_table", "WHERE stock_quantity <= 0");
+
+// Total count of products in the products_table
+$total_products = getRecordCount($con, "products_table");
+
+// Total transactions for today in the cart_table
+$today = date('Y-m-d');
+$total_today_transactions = getRecordCount($con, "cart_table", "WHERE DATE(timestamp) = '$today'");
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,243 +56,240 @@
 
 
     <!--<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">-->
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./css/index_style.css">
 
 </head>
 <body>
-
-<div class="container" >
-    <h2>Sari-Sari Store Inventory</h2>
-    <form id="productForm">
-        <select id="productProductId" name="productProductId">
-            <?php
-            include 'connection.php'; // Include your database connection file
-
-            $result = $con->query("SELECT product_id FROM products_table");
-
-            echo "<option value=\"\">Select a Product</option>";
-
-            while ($row = $result->fetch_assoc()) {
-                echo "<option value=\"{$row["product_id"]}\">{$row["product_id"]}</option>";
-            }
-
-            // Close the database connection
-            $con->close();
-            ?>
-        </select>
-
-        <label for="productProductName">Product Name:</label>
-        <input type="text" id="productProductName" name="productName">
-    
-        <label for="productUnitPrice">Unit Price:</label>
-        <input type="number" id="productUnitPrice" name="unitPrice">
-    
-        <label for="productStockQuantity">Stock Quantity:</label>
-        <input type="number" id="productStockQuantity" name="stockQuantity">
-    
-        <button type="button" id="addProductBtn">Add Product</button>
-        <button type="button" id="updateProductBtn">Update Product</button>
-        <button type="button" id="deleteProductBtn">Delete Product</button>
-    </form>
-
-    <div class="overflow-y-scroll" id="productList" style="height: 200px;">
-        <!-- Product list will be displayed here -->
-        <?php
-        include 'connection.php';
-
-        $sql = "SELECT * FROM products_table";
-        $result = $con->query($sql);
+<?php if (isset($_SESSION['user_id'])): ?>
+<div class="container">
+    <div class="row align-items-start">
         
-        if ($result->num_rows > 0) {
-            echo "<table class='table table-dark table-hover' id='productTable'>";
-            echo '
-                <thead>
-                    <tr>
-                        <th scope="col">Product ID</th>
-                        <th scope="col">Product Name</th>
-                        <th scope="col">Unit Price</th>
-                        <th scope="col">Stock Quantity</th>
-                    </tr>
-                </thead>';
-            while ($row = $result->fetch_assoc()) {
-                echo '<tbody class="table-group-divider">';
-                echo "<tr>";
-                echo "<td>" . $row["product_id"] . "</td>";
-                echo "<td>" . $row["product_name"] . "</td>";
-                echo "<td>" . $row["unit_price"] . "</td>";
-                echo "<td>" . $row["stock_quantity"] . "</td>";
-                echo '</tbody>';
-            }
-            echo "</table>";
-        } else {
-            echo "No records found";
-        }
+        <!-- Left Container -->
+        <div class="col overflow-y-auto" id="left-container">
+            <div class="d-block px-2 pt-2 px-3">
+                <h1>SARI-SARI STORE</h1>
+                <h6 style="margin-bottom: 0;">Earnings Log System</h6>
+            </div>
+            <div class="d-block p-2 px-3">
+             <div class="row">
+                
+                <a id="dropdown" class="nav-link col-12 p-2 mb-2 dropdown-toggle border rounded text-decoration-none" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Welcome, <span><?= htmlspecialchars($user["username"]) ?>!</span>
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown" style="width: 200px; max-height: 200px; overflow-y: auto;">
+                    <li><a class="dropdown-item" href="admin_page.php">Create Report</a></li>
+                    <li><a class="dropdown-item" href="#header">Log History</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" id="logout" href="./php/logout.php">Logout</a></li>
+                </ul>
+
+
+
+                <!-- Total Products -->
+                <a id="overview" href="#product" class="nav-link col-12 p-2 mb-1 border rounded bg-success text-decoration-none">
+                    <span><?php echo $total_products; ?></span> <h5>Total Products</h5>
+                </a>
+
+                <!-- Out of Stocks -->
+                <a id="overview" href="#outStock" class="nav-link col-12 p-2 mb-1 border rounded bg-danger text-decoration-none ">
+                    <span><?php echo $total_outofstock_products; ?></span> <h5>Out of Stocks</h5>
+                </a>
+
+                <!-- Today's Sold Items -->
+                <a id="overview" href="#soldItems" class="nav-link col-12 p-2 mb-1 border rounded bg-primary text-decoration-none">
+                    <span><?php echo $total_today_transactions; ?></span> <h5>Today's Sold Items</h5>
+                </a>
+              </div>
+            </div>
+        </div>
         
-        $con->close();
-        ?>
+        <!-- Right Container -->
+        <div class="col overflow-y-auto p-2" id="right-container">
+          <div class="d-block p-2 px-3" id="header">
+            <h6> DASHBOARD</h6>
+          </div>
+          <div class="d-block p-2 px-3 m-3">
+              <h2 id="earnings">Earnings Log History</h2>
+              <div class="overflow-y-auto p-2 px-3" id="cartList" style="background-color: #cfe2ff; border-radius:8px; height: 77vh;">
+                <?php
+                  include 'connection.php';
+
+                  // Modified SQL query to fetch records from record_sale_table
+                  $sql = "SELECT * FROM record_sale_table";
+                  $result = $con->query($sql);
+
+                  if ($result->num_rows > 0) {
+                      echo "<table class='table table-primary' id='recordSaleTable'>";
+                      echo '
+                          <thead>
+                              <tr>
+                                  <th scope="col">Record Sale ID</th>
+                                  <th scope="col">User ID</th>
+                                  <th scope="col">Sale Date</th>
+                                  <th scope="col">Total Items</th>
+                                  <th scope="col">Total Price</th>
+                                  <th scope="col">Timestamp</th>
+                              </tr>
+                          </thead>';
+                      while ($row = $result->fetch_assoc()) {
+                          echo '<tbody class="table-group-divider">';
+                          echo "<tr>";
+                          echo "<td>" . $row["record_sale_id"] . "</td>";
+                          echo "<td>" . $row["user_id"] . "</td>";
+                          echo "<td>" . $row["sale_date"] . "</td>";
+                          echo "<td>" . $row["total_items"] . "</td>";
+                          echo "<td>" . $row["total_price"] . "</td>";
+                          echo "<td>" . $row["timestamp"] . "</td>";
+                          echo '</tbody>';
+                      }
+                      echo "</table>";
+                  } else {
+                      echo "No records found";
+                  }
+
+                  $con->close();
+                  ?>
+
+              </div>
+          </div>
+          <div class="d-block p-2 px-3 m-3">
+            <h2 id="product">Products</h2>
+            <div class="overflow-y-auto p-2 px-3" id="productList" style="background-color: #cfe2ff; border-radius:8px; height: 55vh;">
+                <?php
+                include 'connection.php';
+
+                // Modified SQL query to fetch products from products_table where stock_quantity is less than or equal to 0
+                $sql = "SELECT * FROM products_table";
+                $result = $con->query($sql);
+
+                if ($result->num_rows > 0) {
+                    echo "<table class='table table-primary' id='productTable'>";
+                    echo '
+                        <thead>
+                            <tr>
+                                <th scope="col">Product ID</th>
+                                <th scope="col">Product Name</th>
+                                <th scope="col">Unit Price</th>
+                                <th scope="col">Stock</th>
+                            </tr>
+                        </thead>';
+                    while ($row = $result->fetch_assoc()) {
+                        echo '<tbody class="table-group-divider">';
+                        echo "<tr>";
+                        echo "<td>" . $row["product_id"] . "</td>";
+                        echo "<td>" . $row["product_name"] . "</td>";
+                        echo "<td>" . $row["unit_price"] . "</td>";
+                        echo "<td>" . $row["stock_quantity"] . "</td>";
+                        echo '</tbody>';
+                    }
+                    echo "</table>";
+                } else {
+                    echo "No records found";
+                }
+
+                $con->close();
+                ?>
+            </div>
+          </div>
+          <div class="d-block p-2 px-3 m-3">
+            <h2 id="outStock">Out of stock</h2>
+            <div class="overflow-y-auto p-2 px-3" id="productList" style="background-color: #cfe2ff; border-radius:8px; height: 55vh;">
+
+                <!-- Product list will be displayed here -->
+                <?php
+                include 'connection.php';
+
+                // Modified SQL query to fetch products with stock_quantity <= 0
+                $sql = "SELECT * FROM products_table WHERE stock_quantity <= 0";
+                $result = $con->query($sql);
+
+                if ($result->num_rows > 0) {
+                    echo "<table class='table table-primary' id='productTable'>";
+                    echo '
+                        <thead>
+                            <tr>
+                                <th scope="col">Product ID</th>
+                                <th scope="col">Product Name</th>
+                                <th scope="col">Unit Price</th>
+                                <th scope="col">Stock</th>
+                            </tr>
+                        </thead>';
+                    while ($row = $result->fetch_assoc()) {
+                        echo '<tbody class="table-group-divider">';
+                        echo "<tr>";
+                        echo "<td>" . $row["product_id"] . "</td>";
+                        echo "<td>" . $row["product_name"] . "</td>";
+                        echo "<td>" . $row["unit_price"] . "</td>";
+                        echo "<td>" . $row["stock_quantity"] . "</td>";
+                        echo '</tbody>';
+                    }
+                    echo "</table>";
+                } else {
+                    echo "No records found";
+                }
+
+                $con->close();
+                ?>
+            </div>
+
+          </div>
+          <div class="d-block p-2 px-3 m-3">
+              <h2 id="soldItems">Sold Items</h2>
+              <div class="overflow-y-auto p-2 px-3" id="cartList" style="background-color: #cfe2ff; border-radius:8px; height: 55vh;">
+
+                  <!-- Cart list will be displayed here -->
+                  <?php
+                  include 'connection.php';
+
+                  // Modified SQL query to fetch transactions from cart_table for today
+                  $today = date('Y-m-d');
+                  $cartSql = "SELECT cart_table.id, cart_table.product_id, products_table.product_name, cart_table.unit_price, cart_table.quantity, DATE(cart_table.timestamp) AS date 
+                  FROM cart_table
+                  INNER JOIN products_table ON cart_table.product_id = products_table.product_id
+                  WHERE DATE(cart_table.timestamp) = '$today'";
+                  $cartResult = $con->query($cartSql);
+
+                  if ($cartResult->num_rows > 0) {
+                      echo "<table class='table table-primary' id='cartTable'>";
+                      echo '
+                          <thead>
+                              <tr>
+                                  <th scope="col">ID</th>
+                                  <th scope="col">Product Name</th>
+                                  <th scope="col">Unit Price</th>
+                                  <th scope="col">Quantity</th>
+                                  <th scope="col">Date</th>
+                              </tr>
+                          </thead>';
+                      while ($cartRow = $cartResult->fetch_assoc()) {
+                          echo '<tbody class="table-group-divider">';
+                          echo "<tr>";
+                          echo "<td>" . $cartRow["id"] . "</td>";
+                          echo "<td>" . $cartRow["product_name"] . "</td>";
+                          echo "<td>" . $cartRow["unit_price"] . "</td>";
+                          echo "<td>" . $cartRow["quantity"] . "</td>";
+                          echo "<td>" . $cartRow["date"] . "</td>";
+                          echo '</tbody>';
+                      }
+                      echo "</table>";
+                  } else {
+                      echo "No records found";
+                  }
+
+                  $con->close();
+                  ?>
+              </div>
+          </div>
+          
+        </div>
+        
     </div>
 </div>
+<?php else: ?>
+    <button id="loginBtn" type="button" class="btn btn-danger" onclick="location.href='login.php'">
+        <i class="fa fa-lock"></i> Login
+    </button>
+<?php endif; ?>
 
-<div class="container" id="cart-container">
-    <h2>Cart</h2>
-    <form id="cartForm">
-        <select id="cartProductId" name="cartProductId">
-            <?php
-            include 'connection.php';
-
-            $result = $con->query("SELECT product_id FROM products_table");
-
-            echo "<option value=\"\">Select a Product</option>";
-
-            while ($row = $result->fetch_assoc()) {
-                echo "<option value=\"{$row["product_id"]}\">{$row["product_id"]}</option>";
-            }
-
-            $con->close();
-            ?>
-        </select>
-        
-        <label for="cartProductName">Product Name:</label>
-        <input type="text" id="cartProductName" name="cartProductName" readonly>
-    
-        <label for="cartUnitPrice">Unit Price:</label>
-        <input type="number" id="cartUnitPrice" name="cartUnitPrice" readonly>
-    
-        <label for="cartSoldQuantity">Sold Item Quantity:</label>
-        <input type="number" id="cartSoldQuantity" name="cartSoldQuantity">
-    
-        <button id="addSoldProductBtn">Add Sold Items</button>
-        <button id="deleteSoldProductBtn">Delete Sold Items</button>
-
-    </form>
-
-    
-<div>
-    <label for="selectedDate">Select Date:</label>
-    <input type="date" id="selectedDate" name="selectedDate">
-    <button onclick="loadCart()">Load Cart</button>
-</div>
-<div class="overflow-y-scroll" id="cart" style="height: 200px;">
-    <!-- Cart list will be displayed here -->
-    <?php
-    include 'connection.php';
-
-    // Initialize $todayDate with the current date as a default
-    $todayDate = date("Y-m-d");
-
-    // Check if a date is provided by the user
-    if (isset($_GET['selectedDate'])) {
-        // Use the provided date if available and convert it to the correct format
-        $selectedDate = $_GET['selectedDate'];
-        $todayDate = date("Y-m-d", strtotime($selectedDate));
-    }
-
-    // Your existing SQL query
-    $cartSql = "SELECT * FROM cart_table WHERE DATE(timestamp) = '$todayDate'";
-    $cartResult = $con->query($cartSql);
-
-    if ($cartResult->num_rows > 0) {
-        echo "<table class='table table-dark table-hover' id='cartTable'>";
-        echo '
-            <thead>
-                <tr>
-                    <th scope="col">ID</th>
-                    <th scope="col">Product ID</th>
-                    <th scope="col">Unit Price</th>
-                    <th scope="col">Quantity</th>
-                    <th scope="col">Timestamp</th>
-                </tr>
-            </thead>';
-        while ($cartRow = $cartResult->fetch_assoc()) {
-            echo '<tbody class="table-group-divider">';
-            echo "<tr>";
-            echo "<td>" . $cartRow["id"] . "</td>";
-            echo "<td>" . $cartRow["product_id"] . "</td>";
-            echo "<td>" . $cartRow["unit_price"] . "</td>";
-            echo "<td>" . $cartRow["quantity"] . "</td>";
-            echo "<td>" . $cartRow["timestamp"] . "</td>";
-            echo '</tbody>';
-        }
-        echo "</table>";
-    } else {
-        echo "Cart is empty";
-    }
-
-    $con->close();
-    ?>
-</div>
-
-
-
-    
-    <button id="submitCartBtn">Submit Cart</button>
-</div>
-
-
-<script>
-    function loadCart() {
-        // Get the selected date from the input field
-        const selectedDate = document.getElementById('selectedDate').value;
-
-        // Reload the page with the selected date as a parameter
-        window.location.href = 'index.php?selectedDate=' + selectedDate;
-    }
-</script>
-
-<script>
-    $(document).ready(function() {
-        // Event handler for regular product selection
-        $('#productProductId').change(function() {
-            var selectedOption = $(this).val();
-            handleProductSelection(selectedOption, 'product');
-        });
-
-        // Event handler for cart product selection
-        $('#cartProductId').change(function() {
-            var selectedOption = $(this).val();
-            handleProductSelection(selectedOption, 'cart');
-        });
-
-        function handleProductSelection(selectedOption, prefix) {
-            var table = $('#productTable');
-
-            // Show all rows
-            table.find('tbody tr').show();
-
-            if (selectedOption !== "") {
-                // Hide rows where the product ID does not match the selected option
-                table.find('tbody tr').filter(function() {
-                    return $(this).find('td:first-child').text() !== selectedOption;
-                }).hide();
-
-                // Find the selected row
-                var selectedRow = table.find('tbody tr').filter(function() {
-                    return $(this).find('td:first-child').text() === selectedOption;
-                });
-
-                // Populate input boxes with corresponding values from the selected row
-                var productName = selectedRow.find('td:eq(1)').text();
-                var unitPrice = selectedRow.find('td:eq(2)').text();
-                var stockQuantity = selectedRow.find('td:eq(3)').text();
-
-                // Set values in the input boxes with the specified prefix
-                $('#' + prefix + 'ProductName').val(productName);
-                $('#' + prefix + 'UnitPrice').val(unitPrice);
-                $('#' + prefix + 'StockQuantity').val(stockQuantity);
-            } else {
-                // Clear input boxes if the selected option is empty
-                $('#' + prefix + 'ProductName, #' + prefix + 'UnitPrice, #' + prefix + 'StockQuantity').val('');
-            }
-        }
-    });
-</script>
-
-
-
-
-
-
-<!-- Include your script.js file -->
-<script src="script.js"></script>
 </body>
 </html>

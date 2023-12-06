@@ -1,3 +1,72 @@
+// Function to handle the login action
+function handleLogin() {
+    const username = document.getElementById('inputUsername').value;
+    const password = document.getElementById('inputPassword').value;
+
+    // Check if any of the required fields is empty
+    if (!username || !password) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Please fill in all required fields!',
+        });
+        return;
+    }
+
+    const data = {
+        username: username,
+        password: password
+    };
+
+    executeLogin(data);
+}
+
+// Function to execute the login action
+function executeLogin(data) {
+    const url = 'php/login_handler.php';
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams(data),
+    })
+    .then(response => response.text())
+    .then(result => {
+        console.log(result); // Log the result from the server
+        if (result === 'success') {
+             // Clear input boxes
+            document.getElementById('inputUsername').value = '';
+            document.getElementById('inputPassword').value = '';
+            
+            // Show SweetAlert success message
+            Swal.fire({
+                icon: 'success',
+                title: 'Login successful!',
+                showConfirmButton: false,
+                timer: 1500
+            }).then(() => {
+                // Redirect to another page or perform additional actions
+                window.location.href = 'index.php';
+            });
+        } else {
+            document.getElementById('inputPassword').value = '';
+            // Show SweetAlert for authentication failure or other errors
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: result || 'Unknown error occurred',
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        // Handle errors if any
+    });
+}
+
+
 // Function to handle adding stock
 function addStock(productId, productName) {
     Swal.fire({
@@ -24,7 +93,7 @@ function addStock(productId, productName) {
 
 // Function to execute the addStock action
 function executeAddStock(data) {
-    const url = 'php/product_handler.php';
+    const url = 'php/product_process.php'; // Change the URL to match your structure
 
     fetch(url, {
         method: 'POST',
@@ -75,7 +144,7 @@ function handleProductAction(action) {
         });
         return;
     }
-    
+
     const data = {
         action: action,
         product_id: productId,
@@ -101,7 +170,7 @@ function handleProductAction(action) {
 
 // Function to execute the product action (add/update/delete)
 function executeProductAction(action, data) {
-    const url = 'php/product_handler.php';
+    const url = 'php/product_process.php'; // Change the URL to match your structure
 
     fetch(url, {
         method: 'POST',
@@ -190,6 +259,7 @@ function handleCartAction(action) {
 
 // Function to execute the cart action (add/delete)
 function executeCartAction(action, data) {
+    
     const url = 'php/cart_handler.php';
 
     fetch(url, {
@@ -235,6 +305,7 @@ function executeCartAction(action, data) {
 }
 /////////////////////////////////////////
 // Function to handle the submit cart action
+// Function to handle the submit cart action
 function handleSubmitCart() {
     // Get the selected date from the input field
     const selectedDate = document.getElementById('selectedDate').value;
@@ -246,7 +317,7 @@ function handleSubmitCart() {
             title: 'Error',
             text: 'Please select a date!',
         });
-        return;
+        return false; // Prevent form submission
     }
 
     // Confirm with the user before submitting the cart
@@ -310,13 +381,7 @@ function handleSubmitCart() {
                 });
         }
     });
+
+    return false; // Prevent form submission
 }
 
-// Add an event listener to the "Submit Cart" button
-document.getElementById("submitCartBtn").addEventListener("click", function (event) {
-    // Prevent the default button click behavior
-    event.preventDefault();
-
-    // Call the function to handle the submit cart action
-    handleSubmitCart();
-});

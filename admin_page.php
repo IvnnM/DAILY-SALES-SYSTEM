@@ -1,9 +1,29 @@
+<?php
+// Start session
+session_start();
+
+include 'connection.php';
+
+if (isset($_SESSION["user_id"])) {
+    $sql = "SELECT username FROM user_table
+            WHERE user_id = {$_SESSION["user_id"]}";
+
+    $result = $con->query($sql);
+
+    if ($result) {
+        $user = $result->fetch_assoc();
+    } else {
+        // Add this to see if there's an error in your query
+        echo "Query failed: " . $con->error;
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sari-Sari Store Inventory</title>
+    <title>Admin Page</title>
     <!--Bootstrap-->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
@@ -13,18 +33,19 @@
 
 
     <!--<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">-->
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./css/admin_style.css">
+    
 </head>
 <body>
-
+<?php if (isset($_SESSION['user_id'])): ?>
 <div class="container" >
   <div class="row align-items-start">
     
     <div class="col" id="left-container">
-      <div class="d-block p-2 px-3" style="height: 8vh;">
+      <div class="d-block pt-2 px-3">
         <h2>SARI-SARI STORE INVENTORY</h2>
       </div>
-      <div class="d-block p-3 pb-0 overflow-y-auto" id="product-container" style="height: 29vh;" >
+      <div class="d-block p-3 pb-0 overflow-y-auto" id="product-container">
 
         <form id="productForm">
           <div class="mb-3">
@@ -70,16 +91,16 @@
           </div>
 
 
-          <button type="button" onclick="handleProductAction('addProduct')" class="btn">Add Product</button>
-          <button type="button" onclick="handleProductAction('updateProduct')" class="btn update">Update Product</button>
-          <button type="button" onclick="handleProductAction('deleteProduct')" class="btn delete">Delete Product</button>
+          <button type="button" onclick="handleProductAction('addProduct')" class="btn mb-1 btn-success">Add Product</button>
+          <button type="button" onclick="handleProductAction('updateProduct')" class="btn mb-1 update btn-warning">Update Product</button>
+          <button type="button" onclick="handleProductAction('deleteProduct')" class="btn mb-1 delete btn-danger">Delete Product</button>
         </form>
 
 
         
       </div>
-      <div class="d-block p-2">
-          <div class="overflow-y-auto p-2" id="productList" style="background-color: #cfe2ff; border-radius:8px; height: 56vh;">
+      <div class="d-block pt-2 px-3">
+          <div class="overflow-y-auto p-2" id="productList" style="background-color: #cfe2ff; border-radius:8px; height: 55vh;">
             <!-- Product list will be displayed here -->
             <?php
             include 'connection.php';
@@ -107,7 +128,7 @@
                     echo "<td>" . $row["unit_price"] . "</td>";
                     echo "<td>" . $row["stock_quantity"] . "</td>";
 
-                    echo "<td><button id='addStockBtn' onclick='addStock(" . $row["product_id"] . ", \"" . $row["product_name"] . "\")'>Add Stock</button></td>";
+                    echo "<td><button class='btn btn-success' id='addStockBtn' onclick='addStock(" . $row["product_id"] . ", \"" . $row["product_name"] . "\")'>Add Stock</button></td>";
 
 
                     echo '</tbody>';
@@ -123,10 +144,10 @@
       </div>
     </div>
     <div class="col" id="right-container">
-      <div class="d-block p-2 px-3" style="height: 8vh;">
+      <div class="d-block pt-2 px-3">
         <h2>SOLD ITEMS</h2>
       </div>
-      <div class="d-block p-3 pb-0 overflow-y-auto" id="cart-container" style="height: 42vh;">
+      <div class="d-block p-3 pb-0 overflow-y-auto" id="cart-container">
       <form id="cartForm">
         <div class="mb-3">
             <select id="cartProductId" name="cartProductId" class="form-select" aria-label="Product ID">
@@ -168,19 +189,28 @@
         </div>
 
 
-        <button type="button" onclick="handleCartAction('addSoldItems')" class="btn mb-1">Add Sold Items</button>
-        <button type="button" onclick="handleCartAction('deleteSoldItems')" class="btn delete mb-1">Delete Sold Items</button>
-        <a href="dashboard.php" class="btn mb-1" role="button" id="reports">Go To Reports</a>
-
+        <button type="button" onclick="handleCartAction('addSoldItems')" class="btn mb-1 btn-success">Add Sold Items</button>
+        <button type="button" onclick="handleCartAction('deleteSoldItems')" class="btn delete mb-1 btn-danger">Delete Sold Items</button>
+   
+        <a id="dropdown" class="btn mb-1 dropdown-toggle border rounded text-decoration-none" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Dropdown
+        </a>
+        <ul class="dropdown-menu" aria-labelledby="navbarDropdown" style="width: 110px; max-height: 200px; overflow-y: auto;">
+            <li><a class="dropdown-item" href="index.php">Dashboard</a></li>
+            <li><a class="dropdown-item" href="">About</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" id="logout" href="./php/logout.php">Logout</a></li>
+        </ul>
       </form>
 
       </div>
       <div class="d-block p-2">
         <div class="overflow-y-auto p-2" id="soldProductList" style="background-color:#cfe2ff; border:solid #75acd2; border-radius:8px; height: 43vh">
-            <form method="get">
-                <input type="date" id="selectedDate" name="selectedDate" value="<?php echo isset($_GET['selectedDate']) ? htmlspecialchars($_GET['selectedDate']) : date('Y-m-d'); ?>" onchange="this.form.submit()">
-                <button id="submitCartBtn">Create Report</button>
-            </form>
+        <form method="get">
+            <input type="date" id="selectedDate" name="selectedDate" value="<?php echo isset($_GET['selectedDate']) ? htmlspecialchars($_GET['selectedDate']) : date('Y-m-d'); ?>" onchange="this.form.submit()">
+            <button id="submitCartBtn" onclick="return handleSubmitCart()">Submit Report</button>
+        </form>
+
           
           <!-- Cart list will be displayed here -->
           <?php
@@ -242,18 +272,6 @@
     
 </div>
 
-
-
-<script>
-    function loadCart() {
-        // Get the selected date from the input field
-        const selectedDate = document.getElementById('selectedDate').value;
-
-        // Reload the page with the selected date as a parameter
-        window.location.href = 'admin_page.php?selectedDate=' + selectedDate;
-    }
-</script>
-
 <script>
     $(document).ready(function() {
         // Event handler for regular product selection
@@ -305,7 +323,11 @@
 
 
 
-
+<?php else: ?>
+    <button id="loginBtn" type="button" class="btn btn-danger" onclick="location.href='login.php'">
+        <i class="fa fa-lock"></i> Login
+    </button>
+<?php endif; ?>
 
 <!-- Include your script.js file -->
 <script src="script.js"></script>

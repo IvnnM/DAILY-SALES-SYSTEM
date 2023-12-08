@@ -1,4 +1,5 @@
 <?php
+// Product Handling process
 // Start the session
 session_start();
 

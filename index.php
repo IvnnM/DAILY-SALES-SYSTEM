@@ -1,7 +1,7 @@
 <?php
 // Start session
 session_start();
-
+date_default_timezone_set('Asia/Manila');
 include 'connection.php';
 
 if (isset($_SESSION["user_id"])) {
@@ -61,6 +61,7 @@ $total_today_transactions = getRecordCount($con, "cart_table", "WHERE DATE(times
 </head>
 <body>
 <?php if (isset($_SESSION['user_id'])): ?>
+    
 <div class="container">
     <div class="row align-items-start">
         
@@ -74,7 +75,7 @@ $total_today_transactions = getRecordCount($con, "cart_table", "WHERE DATE(times
              <div class="row">
                 
                 <a id="dropdown" class="nav-link col-12 p-2 mb-2 dropdown-toggle border rounded text-decoration-none" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Welcome, <span><?= htmlspecialchars($user["username"]) ?>!</span>
+                Welcome, <span><?= htmlspecialchars($user["username"]) ?>! </span>
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown" style="width: 200px; max-height: 200px; overflow-y: auto;">
                     <li><a class="dropdown-item" href="admin_page.php">Create Report</a></li>

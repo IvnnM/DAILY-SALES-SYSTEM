@@ -197,7 +197,6 @@ if (isset($_SESSION["user_id"])) {
         </a>
         <ul class="dropdown-menu" aria-labelledby="navbarDropdown" style="width: 110px; max-height: 200px; overflow-y: auto;">
             <li><a class="dropdown-item" href="index.php">Dashboard</a></li>
-            <li><a class="dropdown-item" href="">About</a></li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" id="logout" href="./php/logout.php">Logout</a></li>
         </ul>
@@ -215,7 +214,7 @@ if (isset($_SESSION["user_id"])) {
           <!-- Cart list will be displayed here -->
           <?php
           include 'connection.php';
-
+          date_default_timezone_set('Asia/Manila');
           // Initialize $todayDate with the current date as a default
           $todayDate = date("Y-m-d");
 

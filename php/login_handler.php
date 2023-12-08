@@ -35,23 +35,31 @@ class LoginHandler extends DatabaseHandler
         }
 
         // Query the database (modify as needed)
-        $query = "SELECT user_id FROM user_table WHERE username = '$username' AND password = '$password'";
+        $query = "SELECT user_id, password FROM user_table WHERE username = '$username'";
         $result = $this->con->query($query);
 
         if ($result->num_rows > 0) {
-            // Fetch user_id
+            // Fetch user data
             $row = $result->fetch_assoc();
-            $user_id = $row['user_id'];
+            $storedPasswordHash = $row['password'];
 
-            // Start session
-            session_start();
+            // Verify password
+            if (password_verify($password, $storedPasswordHash)) {
+                // Password is correct
 
-            // Set session variables
-            $_SESSION['user_id'] = $user_id;
+                // Start session
+                session_start();
 
-            return "success";
+                // Set session variables
+                $_SESSION['user_id'] = $row['user_id'];
+
+                return "success";
+            } else {
+                // Password verification failed
+                return "Invalid username or password";
+            }
         } else {
-            // Authentication failed
+            // User not found
             return "Invalid username or password";
         }
     }

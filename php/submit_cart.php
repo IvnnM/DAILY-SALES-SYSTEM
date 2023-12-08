@@ -15,7 +15,7 @@ class SaleHandler
         }
     }
 
-    public function processSale($selectedDate)
+    public function processSale($selectedDate, $userId)
     {
         // Fetch cart items for the selected date
         $cartSql = "SELECT * FROM cart_table WHERE DATE(timestamp) = '$selectedDate'";
@@ -36,7 +36,7 @@ class SaleHandler
 
                 // Insert into record_sale_table
                 $insertSaleSql = "INSERT INTO record_sale_table (user_id, sale_date, total_items, total_price, timestamp) 
-                                  VALUES (1, '$selectedDate', $totalItems, $totalPrice, NOW())"; // Replace '1' with the actual user_id
+                                  VALUES ('$userId', '$selectedDate', $totalItems, $totalPrice, NOW())";
 
                 if ($this->con->query($insertSaleSql) === TRUE) {
                     // Clear the cart for the selected date
@@ -62,9 +62,11 @@ class SaleHandler
 }
 
 // Usage example:
+session_start();
+$userId = $_SESSION['user_id']; // Assuming user_id is stored in the session
 $saleHandler = new SaleHandler($con);
 $selectedDate = $_GET['selectedDate'];
-$result = $saleHandler->processSale($selectedDate);
+$result = $saleHandler->processSale($selectedDate, $userId);
 echo $result;
 $saleHandler->closeConnection();
 ?>

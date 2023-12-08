@@ -17,23 +17,27 @@
 
     <style>
     body {
-    padding: 26vh;
-    padding-top: 5vh;
+    padding: 6vh;
     background-color: #75acd2;
     color: #0a2e48;
     }
 
     .col {
-    height:55vh;
+    
     padding: 0;
     }
     #login-container{
+    position: relative;
     max-width: 56%;
+    height:55vh;
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
     }
-
+    #header {
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+        border-radius: 8px;
+    }
     #username, #password {
     border: solid 2px;
     border-radius: 7px;
@@ -50,15 +54,16 @@
 
 </head>
 <body>
-<div class="container">
-    <div class="row">
-
-        <div class="col ms-auto overflow-y-auto p-3" id="login-container">
-            <div class="d-block px-4 pt-1" id="header">
-                <h2>WELCOME TO EARNINGS LOG SYSTEM</h2>
+<div class="d-flex justify-content-center align-items-center" style=""  id="header">
+    <h1 style="font-size:90px;">EARNINGS LOG SYSTEM</h1>
+</div>
+<div class="container" style="padding-top: 3vh;">
+    <div class="container d-flex justify-content-center align-items-center">
+        <div class="overflow-y-auto p-3" id="login-container">
+            <div class="d-block px-4 pt-1" id="signin">
+                <h1>Sign in your account</h1>
             </div>
             <div class="d-block px-4 pt-3" id="form">
-                <p>Sign in your account.</p>
                 <!-- Login Form -->
                 <form id="loginForm">
                     <!-- Username Section -->
@@ -75,7 +80,7 @@
 
 
                    <!-- Submit Button -->
-                    <div class="input-group  pt-2">
+                    <div class="input-group  pt-2 mb-3">
                         <button type="button" class="btn btn-primary form-control" onclick="handleLogin()">Login</button>
                     </div>
 

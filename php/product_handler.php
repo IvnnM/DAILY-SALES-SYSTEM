@@ -1,5 +1,5 @@
 <?php
-// CRUD for Product
+// CRUD for Product Handling
 
 class DatabaseHandler
 {
